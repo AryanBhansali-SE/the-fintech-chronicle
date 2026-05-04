@@ -96,6 +96,33 @@ function WidgetView({ w }: { w: Widget }) {
         </ul>
       </div>
     );
+  if (w.type === "excerpts") {
+    const q = (w as any).query as string | undefined;
+    return (
+      <div className="border border-foreground/20 p-3 my-2 bg-background">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+          From {w.scope} · {w.items.length} match{w.items.length === 1 ? "" : "es"}
+        </div>
+        {w.items.length === 0 ? (
+          <p className="text-xs text-muted-foreground italic">No matches on this page.</p>
+        ) : (
+          <ul className="space-y-3">
+            {w.items.map((a) => (
+              <li key={a.slug} className="border-l-2 border-[hsl(var(--alert))] pl-2">
+                <Link to="/article/$slug" params={{ slug: a.slug }} className="block hover:underline">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{a.category}</div>
+                  <div className="font-serif text-sm leading-tight">{a.title}</div>
+                </Link>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                  <Highlight text={a.snippet} query={q ?? ""} />
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
   return null;
 }
 

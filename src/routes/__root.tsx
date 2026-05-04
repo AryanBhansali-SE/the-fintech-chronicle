@@ -41,6 +41,10 @@ export const Route = createRootRoute({
       { property: "og:description", content: "A modern interactive newspaper for AI and financial markets." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "The Signal — AI & Finance" },
+      { name: "twitter:description", content: "A modern interactive newspaper for AI and financial markets." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e450c106-25e7-4082-b87f-a6b31957feff/id-preview-0e559d65--a37a20cb-5e61-476d-89da-06cdb97f5f46.lovable.app-1777883788744.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e450c106-25e7-4082-b87f-a6b31957feff/id-preview-0e559d65--a37a20cb-5e61-476d-89da-06cdb97f5f46.lovable.app-1777883788744.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

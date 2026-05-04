@@ -1,7 +1,25 @@
-import { useState, useRef, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { conciergeChat, type Widget } from "@/server/concierge.functions";
+
+function Highlight({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig");
+  const parts = text.split(re);
+  return (
+    <>
+      {parts.map((p, i) =>
+        re.test(p) ? (
+          <mark key={i} className="bg-[hsl(var(--alert))]/15 text-foreground px-0.5">{p}</mark>
+        ) : (
+          <span key={i}>{p}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 
 type Turn = { role: "user" | "assistant"; text: string; widgets?: Widget[] };
 

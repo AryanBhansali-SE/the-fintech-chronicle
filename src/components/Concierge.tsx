@@ -97,7 +97,6 @@ function WidgetView({ w }: { w: Widget }) {
       </div>
     );
   if (w.type === "excerpts") {
-    const q = (w as any).query as string | undefined;
     return (
       <div className="border border-foreground/20 p-3 my-2 bg-background">
         <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">

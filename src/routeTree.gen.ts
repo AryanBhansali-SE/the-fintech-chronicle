@@ -15,6 +15,8 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SectionSlugRouteImport } from './routes/section.$slug'
 import { Route as ArticleSlugRouteImport } from './routes/article.$slug'
+import { Route as ApiPublicConciergeChartRouteImport } from './routes/api/public/concierge-chart'
+import { Route as ApiPublicConciergeRouteImport } from './routes/api/public/concierge'
 
 const TerminalRoute = TerminalRouteImport.update({
   id: '/terminal',
@@ -46,6 +48,16 @@ const ArticleSlugRoute = ArticleSlugRouteImport.update({
   path: '/article/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicConciergeChartRoute = ApiPublicConciergeChartRouteImport.update({
+  id: '/api/public/concierge-chart',
+  path: '/api/public/concierge-chart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicConciergeRoute = ApiPublicConciergeRouteImport.update({
+  id: '/api/public/concierge',
+  path: '/api/public/concierge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +66,8 @@ export interface FileRoutesByFullPath {
   '/terminal': typeof TerminalRoute
   '/article/$slug': typeof ArticleSlugRoute
   '/section/$slug': typeof SectionSlugRoute
+  '/api/public/concierge': typeof ApiPublicConciergeRoute
+  '/api/public/concierge-chart': typeof ApiPublicConciergeChartRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +76,8 @@ export interface FileRoutesByTo {
   '/terminal': typeof TerminalRoute
   '/article/$slug': typeof ArticleSlugRoute
   '/section/$slug': typeof SectionSlugRoute
+  '/api/public/concierge': typeof ApiPublicConciergeRoute
+  '/api/public/concierge-chart': typeof ApiPublicConciergeChartRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +87,8 @@ export interface FileRoutesById {
   '/terminal': typeof TerminalRoute
   '/article/$slug': typeof ArticleSlugRoute
   '/section/$slug': typeof SectionSlugRoute
+  '/api/public/concierge': typeof ApiPublicConciergeRoute
+  '/api/public/concierge-chart': typeof ApiPublicConciergeChartRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +99,8 @@ export interface FileRouteTypes {
     | '/terminal'
     | '/article/$slug'
     | '/section/$slug'
+    | '/api/public/concierge'
+    | '/api/public/concierge-chart'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +109,8 @@ export interface FileRouteTypes {
     | '/terminal'
     | '/article/$slug'
     | '/section/$slug'
+    | '/api/public/concierge'
+    | '/api/public/concierge-chart'
   id:
     | '__root__'
     | '/'
@@ -97,6 +119,8 @@ export interface FileRouteTypes {
     | '/terminal'
     | '/article/$slug'
     | '/section/$slug'
+    | '/api/public/concierge'
+    | '/api/public/concierge-chart'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +130,8 @@ export interface RootRouteChildren {
   TerminalRoute: typeof TerminalRoute
   ArticleSlugRoute: typeof ArticleSlugRoute
   SectionSlugRoute: typeof SectionSlugRoute
+  ApiPublicConciergeRoute: typeof ApiPublicConciergeRoute
+  ApiPublicConciergeChartRoute: typeof ApiPublicConciergeChartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +178,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArticleSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/concierge-chart': {
+      id: '/api/public/concierge-chart'
+      path: '/api/public/concierge-chart'
+      fullPath: '/api/public/concierge-chart'
+      preLoaderRoute: typeof ApiPublicConciergeChartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/concierge': {
+      id: '/api/public/concierge'
+      path: '/api/public/concierge'
+      fullPath: '/api/public/concierge'
+      preLoaderRoute: typeof ApiPublicConciergeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +202,8 @@ const rootRouteChildren: RootRouteChildren = {
   TerminalRoute: TerminalRoute,
   ArticleSlugRoute: ArticleSlugRoute,
   SectionSlugRoute: SectionSlugRoute,
+  ApiPublicConciergeRoute: ApiPublicConciergeRoute,
+  ApiPublicConciergeChartRoute: ApiPublicConciergeChartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

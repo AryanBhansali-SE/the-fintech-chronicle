@@ -1,7 +1,19 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { conciergeChat, fetchChart, type Widget, type ChartSeries } from "@/server/concierge.functions";
+import type { Widget, ChartSeries, ConciergeReply } from "@/server/concierge.functions";
+
+// Public, auth-bypassing endpoints. /_serverFn/* is gated by the preview host
+// auth-bridge (302 redirect), which broke the Concierge button. /api/public/*
+// is reachable from the browser without that gate.
+async function postJSON<T>(url: string, body: unknown): Promise<T> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  return (await res.json()) as T;
+}
 
 type Range = "1D" | "1W" | "1M" | "3M" | "1Y" | "5Y";
 const RANGES: Range[] = ["1D", "1W", "1M", "3M", "1Y", "5Y"];
@@ -133,14 +145,12 @@ function ChartWidget({ initial, initialRange }: { initial: ChartSeries[]; initia
   const [compareInput, setCompareInput] = useState("");
   const [normalize, setNormalize] = useState(series.length > 1);
   const svgRef = useRef<SVGSVGElement>(null);
-  const fetchFn = useServerFn(fetchChart);
-
   const reload = async (next: { symbols?: string[]; range?: Range }) => {
     const symbols = next.symbols ?? series.map((s) => s.symbol);
     const r = next.range ?? range;
     setLoading(true);
     try {
-      const data = await fetchFn({ data: { symbols, range: r } });
+      const data = await postJSON<ChartSeries[]>("/api/public/concierge-chart", { symbols, range: r });
       if (data.length) { setSeries(data); setRange(r); }
     } finally { setLoading(false); }
   };
@@ -401,7 +411,6 @@ export function Concierge() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const chat = useServerFn(conciergeChat);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const page = useMemo(() => {
@@ -420,8 +429,9 @@ export function Concierge() {
     setInput("");
     setLoading(true);
     try {
-      const reply = await chat({
-        data: { messages: next.map((t) => ({ role: t.role, content: t.text })), page },
+      const reply = await postJSON<ConciergeReply>("/api/public/concierge", {
+        messages: next.map((t) => ({ role: t.role, content: t.text })),
+        page,
       });
       setTurns([...next, { role: "assistant", text: reply.text, widgets: reply.widgets }]);
     } catch {

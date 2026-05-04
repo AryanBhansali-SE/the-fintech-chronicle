@@ -318,33 +318,80 @@ function WidgetView({ w }: { w: Widget }) {
         </ul>
       </div>
     );
-  if (w.type === "excerpts") {
-    return (
-      <div className="border border-foreground/20 p-3 my-2 bg-background">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-          From {w.scope} · {w.items.length} match{w.items.length === 1 ? "" : "es"}
+  if (w.type === "excerpts") return <ExcerptsWidget w={w} />;
+  return null;
+}
+
+function ExcerptsWidget({ w }: { w: Extract<Widget, { type: "excerpts" }> }) {
+  const [idx, setIdx] = useState(0);
+  const total = w.items.length;
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+
+  useEffect(() => {
+    if (total === 0) return;
+    itemRefs.current[idx]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [idx, total]);
+
+  const go = (delta: number) => {
+    if (total === 0) return;
+    setIdx((i) => (i + delta + total) % total);
+  };
+
+  return (
+    <div className="border border-foreground/20 p-3 my-2 bg-background">
+      <div className="flex items-center justify-between mb-2 gap-2">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          From {w.scope} · {total} match{total === 1 ? "" : "es"}
         </div>
-        {w.items.length === 0 ? (
-          <p className="text-xs text-muted-foreground italic">No matches on this page.</p>
-        ) : (
-          <ul className="space-y-3">
-            {w.items.map((a) => (
-              <li key={a.slug} className="border-l-2 border-[hsl(var(--alert))] pl-2">
-                <Link to="/article/$slug" params={{ slug: a.slug }} className="block hover:underline">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{a.category}</div>
-                  <div className="font-serif text-sm leading-tight">{a.title}</div>
-                </Link>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  <Highlight text={a.snippet} query={w.query} />
-                </p>
-              </li>
-            ))}
-          </ul>
+        {total > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => go(-1)}
+              aria-label="Previous match"
+              className="px-1.5 py-0.5 border border-foreground/20 hover:border-foreground/60 text-[10px] font-mono"
+            >
+              ‹ Prev
+            </button>
+            <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+              {idx + 1}/{total}
+            </span>
+            <button
+              onClick={() => go(1)}
+              aria-label="Next match"
+              className="px-1.5 py-0.5 border border-foreground/20 hover:border-foreground/60 text-[10px] font-mono"
+            >
+              Next ›
+            </button>
+          </div>
         )}
       </div>
-    );
-  }
-  return null;
+      {total === 0 ? (
+        <p className="text-xs text-muted-foreground italic">No matches on this page.</p>
+      ) : (
+        <ul className="space-y-3 max-h-64 overflow-y-auto">
+          {w.items.map((a, i) => (
+            <li
+              key={`${a.slug}-${i}`}
+              ref={(el) => { itemRefs.current[i] = el; }}
+              className={`border-l-2 pl-2 transition-colors ${
+                i === idx
+                  ? "border-[hsl(var(--alert))] bg-[hsl(var(--alert))]/5"
+                  : "border-foreground/15"
+              }`}
+            >
+              <Link to="/article/$slug" params={{ slug: a.slug }} className="block hover:underline">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{a.category}</div>
+                <div className="font-serif text-sm leading-tight">{a.title}</div>
+              </Link>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                <Highlight text={a.snippet} query={w.query} />
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 export function Concierge() {

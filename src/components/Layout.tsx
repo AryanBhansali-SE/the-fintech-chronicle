@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { Masthead } from "./Masthead";
 import { Ticker } from "./Ticker";
 import { SiteFooter } from "./SiteFooter";
+import { Concierge } from "./Concierge";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <Ticker />
       <main className="flex-1">{children}</main>
       <SiteFooter />
+      <Concierge />
     </div>
   );
 }

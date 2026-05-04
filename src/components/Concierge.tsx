@@ -177,7 +177,9 @@ export function Concierge() {
       <div className="flex items-center justify-between border-b border-foreground/20 px-3 py-2">
         <div>
           <div className="font-serif text-sm">Concierge</div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Reader Assistant</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Reading: <span className="text-foreground">{pathname}</span>
+          </div>
         </div>
         <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground text-lg leading-none">×</button>
       </div>

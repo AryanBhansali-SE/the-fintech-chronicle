@@ -72,7 +72,7 @@ function ArticlePage() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mt-10 max-w-[720px] mx-auto md:columns-2 md:gap-8 [column-rule:1px_solid_var(--color-border)]"
         >
-          {article.body.map((p, i) => (
+          {article.body.map((p: string, i: number) => (
             <p
               key={i}
               className={`mb-5 text-[17px] leading-8 break-inside-avoid ${i === 0 ? "dropcap" : ""}`}
@@ -83,7 +83,7 @@ function ArticlePage() {
         </motion.div>
 
         <div className="mt-10 max-w-[720px] mx-auto flex flex-wrap gap-2">
-          {article.tags.map((t) => (
+          {article.tags.map((t: string) => (
             <span
               key={t}
               className="text-xs smallcaps border border-foreground/30 px-2 py-1"

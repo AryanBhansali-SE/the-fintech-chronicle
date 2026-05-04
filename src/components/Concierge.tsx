@@ -113,7 +113,7 @@ function WidgetView({ w }: { w: Widget }) {
                   <div className="font-serif text-sm leading-tight">{a.title}</div>
                 </Link>
                 <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  <Highlight text={a.snippet} query={q ?? ""} />
+                  <Highlight text={a.snippet} query={w.query} />
                 </p>
               </li>
             ))}

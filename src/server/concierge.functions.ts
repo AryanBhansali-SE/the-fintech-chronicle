@@ -178,10 +178,11 @@ function runTool(name: string, args: any, page?: PageContext): { result: any; wi
   }
   if (name === "search_current_page") {
     const scope = getPageScope(page);
-    const items = searchScope(scope.articles, args.query ?? "");
+    const query = String(args.query ?? "");
+    const items = searchScope(scope.articles, query);
     return {
       result: { scope: scope.label, count: items.length, items },
-      widget: { type: "excerpts", scope: scope.label, items },
+      widget: { type: "excerpts", scope: scope.label, query, items },
     };
   }
   if (name === "summarize_current_page") {

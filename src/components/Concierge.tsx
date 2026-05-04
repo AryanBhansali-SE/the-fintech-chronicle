@@ -1,7 +1,25 @@
-import { useState, useRef, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { conciergeChat, type Widget } from "@/server/concierge.functions";
+
+function Highlight({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig");
+  const parts = text.split(re);
+  return (
+    <>
+      {parts.map((p, i) =>
+        re.test(p) ? (
+          <mark key={i} className="bg-[hsl(var(--alert))]/15 text-foreground px-0.5">{p}</mark>
+        ) : (
+          <span key={i}>{p}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 
 type Turn = { role: "user" | "assistant"; text: string; widgets?: Widget[] };
 
@@ -78,6 +96,32 @@ function WidgetView({ w }: { w: Widget }) {
         </ul>
       </div>
     );
+  if (w.type === "excerpts") {
+    return (
+      <div className="border border-foreground/20 p-3 my-2 bg-background">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+          From {w.scope} · {w.items.length} match{w.items.length === 1 ? "" : "es"}
+        </div>
+        {w.items.length === 0 ? (
+          <p className="text-xs text-muted-foreground italic">No matches on this page.</p>
+        ) : (
+          <ul className="space-y-3">
+            {w.items.map((a) => (
+              <li key={a.slug} className="border-l-2 border-[hsl(var(--alert))] pl-2">
+                <Link to="/article/$slug" params={{ slug: a.slug }} className="block hover:underline">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{a.category}</div>
+                  <div className="font-serif text-sm leading-tight">{a.title}</div>
+                </Link>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                  <Highlight text={a.snippet} query={w.query} />
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
   return null;
 }
 
@@ -90,6 +134,12 @@ export function Concierge() {
   const [loading, setLoading] = useState(false);
   const chat = useServerFn(conciergeChat);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const page = useMemo(() => {
+    const sec = pathname.match(/^\/section\/([^/]+)/);
+    const art = pathname.match(/^\/article\/([^/]+)/);
+    return { path: pathname, slug: sec?.[1] ?? art?.[1] };
+  }, [pathname]);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: 9e9 }); }, [turns, open]);
 
@@ -102,7 +152,7 @@ export function Concierge() {
     setLoading(true);
     try {
       const reply = await chat({
-        data: { messages: next.map((t) => ({ role: t.role, content: t.text })) },
+        data: { messages: next.map((t) => ({ role: t.role, content: t.text })), page },
       });
       setTurns([...next, { role: "assistant", text: reply.text, widgets: reply.widgets }]);
     } catch (e: any) {
@@ -127,7 +177,9 @@ export function Concierge() {
       <div className="flex items-center justify-between border-b border-foreground/20 px-3 py-2">
         <div>
           <div className="font-serif text-sm">Concierge</div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Reader Assistant</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Reading: <span className="text-foreground">{pathname}</span>
+          </div>
         </div>
         <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground text-lg leading-none">×</button>
       </div>

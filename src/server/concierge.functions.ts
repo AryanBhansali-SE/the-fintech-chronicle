@@ -1,15 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
-import { ARTICLES, TICKERS } from "@/lib/mock";
+import { ARTICLES, TICKERS, SECTIONS, articlesByCategory, findArticle } from "@/lib/mock";
 
 type Msg = { role: "user" | "assistant" | "system" | "tool"; content: string; tool_call_id?: string; name?: string; tool_calls?: any };
+
+export type PageContext = { path: string; slug?: string };
+
+export type Excerpt = { slug: string; title: string; category: string; snippet: string };
 
 export type Widget =
   | { type: "quote"; symbols: { symbol: string; price: number; change: number }[] }
   | { type: "compare"; symbols: { symbol: string; price: number; change: number; series: number[] }[]; range: string }
   | { type: "articles"; items: { slug: string; title: string; dek: string; category: string }[] }
-  | { type: "ticker_chart"; symbol: string; price: number; change: number; series: number[] };
+  | { type: "ticker_chart"; symbol: string; price: number; change: number; series: number[] }
+  | { type: "excerpts"; scope: string; items: Excerpt[] };
 
 export type ConciergeReply = { text: string; widgets: Widget[] };
+
 
 const tools = [
   {

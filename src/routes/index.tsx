@@ -107,7 +107,7 @@ function Index() {
             </div>
             <div className="no-scrollbar -mx-6 overflow-x-auto px-6">
               <div className="flex gap-6 pb-2 snap-x snap-mandatory">
-                {featured.map((a, i) => (
+                {featured.map((a: Post, i: number) => (
                   <motion.article
                     key={a.id}
                     initial={{ opacity: 0, x: 40 }}
@@ -142,7 +142,7 @@ function Index() {
         >
           <h3 className="font-serif text-3xl font-black mb-6">More from the desk</h3>
           <div className="grid gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
-            {grid.map((a) => (
+            {grid.map((a: Post) => (
               <motion.div key={a.id} variants={item}><Card a={a} /></motion.div>
             ))}
           </div>

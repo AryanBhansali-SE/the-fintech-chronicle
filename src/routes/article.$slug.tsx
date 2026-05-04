@@ -92,7 +92,7 @@ function ArticlePage() {
           <section className="mt-16 rule-top pt-8">
             <h3 className="font-serif text-2xl font-black mb-6">Related from {article.category}</h3>
             <div className="grid gap-6 md:grid-cols-3">
-              {related.map((a) => (
+              {related.map((a: typeof related[number]) => (
                 <article key={a.id} className="border-t-2 border-foreground pt-3">
                   <h4 className="font-serif text-xl font-bold leading-tight">
                     <Link to="/article/$slug" params={{ slug: a.slug }} className="hover:underline">

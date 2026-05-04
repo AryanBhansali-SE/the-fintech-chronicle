@@ -12,7 +12,7 @@ export type Widget =
   | { type: "compare"; symbols: { symbol: string; price: number; change: number; series: number[] }[]; range: string }
   | { type: "articles"; items: { slug: string; title: string; dek: string; category: string }[] }
   | { type: "ticker_chart"; symbol: string; price: number; change: number; series: number[] }
-  | { type: "excerpts"; scope: string; items: Excerpt[] };
+  | { type: "excerpts"; scope: string; query: string; items: Excerpt[] };
 
 export type ConciergeReply = { text: string; widgets: Widget[] };
 

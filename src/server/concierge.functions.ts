@@ -140,7 +140,7 @@ function findTicker(sym: string) {
   return TICKERS.find((t) => t.symbol.toUpperCase() === sym.toUpperCase());
 }
 
-function runTool(name: string, args: any): { result: any; widget?: Widget } {
+function runTool(name: string, args: any, page?: PageContext): { result: any; widget?: Widget } {
   if (name === "get_quote") {
     const symbols = (args.symbols ?? []).map((s: string) => findTicker(s)).filter(Boolean) as any[];
     return { result: symbols, widget: { type: "quote", symbols } };
@@ -176,20 +176,47 @@ function runTool(name: string, args: any): { result: any; widget?: Widget } {
       .map((a) => ({ slug: a.slug, title: a.title, dek: a.dek, category: a.category }));
     return { result: items, widget: { type: "articles", items } };
   }
+  if (name === "search_current_page") {
+    const scope = getPageScope(page);
+    const items = searchScope(scope.articles, args.query ?? "");
+    return {
+      result: { scope: scope.label, count: items.length, items },
+      widget: { type: "excerpts", scope: scope.label, items },
+    };
+  }
+  if (name === "summarize_current_page") {
+    const scope = getPageScope(page);
+    const summary = scope.articles.map((a) => ({
+      slug: a.slug,
+      title: a.title,
+      category: a.category,
+      dek: a.dek,
+      body: a.body.join(" ").slice(0, 600),
+    }));
+    return { result: { scope: scope.label, articles: summary } };
+  }
   return { result: { error: "unknown tool" } };
 }
 
 export const conciergeChat = createServerFn({ method: "POST" })
-  .inputValidator((d: { messages: Msg[] }) => d)
+  .inputValidator((d: { messages: Msg[]; page?: PageContext }) => d)
   .handler(async ({ data }): Promise<ConciergeReply> => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) return { text: "AI is not configured.", widgets: [] };
 
-    const sys = `You are "Concierge", a helpful guide for The Signal — a luxury AI/finance newspaper. 
-Help readers navigate the site, compare stocks, view charts, and find articles.
-When the user asks about prices, comparisons, charts, or finding stories, CALL THE APPROPRIATE TOOL.
+    const scope = getPageScope(data.page);
+    const sys = `You are "Concierge", a helpful guide for The Signal — a luxury AI/finance newspaper.
+Help readers navigate the site, compare stocks, view charts, find articles, and answer questions about what they're currently reading.
 Available tickers: ${TICKERS.map((t) => t.symbol).join(", ")}.
-After tools return, write a concise 1-3 sentence answer. The UI renders the visual widgets.`;
+
+CURRENT PAGE: ${data.page?.path ?? "/"} (scope: ${scope.label}, ${scope.articles.length} article(s) in scope)
+
+Tool routing:
+- Stocks/prices/charts → get_quote / compare_tickers / show_chart
+- "find articles about X" / general topic across the site → search_articles
+- "what does this page say about X", "find X here", "on this page", "in this section" → search_current_page
+- "summarize this page/section/article" → summarize_current_page
+After tools return, answer in 1-3 concise sentences. The UI renders widgets — don't repeat their contents verbatim.`;
 
     const convo: Msg[] = [{ role: "system", content: sys }, ...data.messages];
     const widgets: Widget[] = [];
@@ -222,10 +249,11 @@ After tools return, write a concise 1-3 sentence answer. The UI renders the visu
       for (const c of calls) {
         let args: any = {};
         try { args = JSON.parse(c.function.arguments || "{}"); } catch {}
-        const { result, widget } = runTool(c.function.name, args);
+        const { result, widget } = runTool(c.function.name, args, data.page);
         if (widget) widgets.push(widget);
         convo.push({ role: "tool", tool_call_id: c.id, name: c.function.name, content: JSON.stringify(result) });
       }
     }
     return { text: "I've gathered the info above.", widgets };
   });
+

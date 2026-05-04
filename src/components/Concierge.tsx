@@ -134,6 +134,12 @@ export function Concierge() {
   const [loading, setLoading] = useState(false);
   const chat = useServerFn(conciergeChat);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const page = useMemo(() => {
+    const sec = pathname.match(/^\/section\/([^/]+)/);
+    const art = pathname.match(/^\/article\/([^/]+)/);
+    return { path: pathname, slug: sec?.[1] ?? art?.[1] };
+  }, [pathname]);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: 9e9 }); }, [turns, open]);
 
@@ -146,7 +152,7 @@ export function Concierge() {
     setLoading(true);
     try {
       const reply = await chat({
-        data: { messages: next.map((t) => ({ role: t.role, content: t.text })) },
+        data: { messages: next.map((t) => ({ role: t.role, content: t.text })), page },
       });
       setTurns([...next, { role: "assistant", text: reply.text, widgets: reply.widgets }]);
     } catch (e: any) {

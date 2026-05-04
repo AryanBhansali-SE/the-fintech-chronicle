@@ -61,7 +61,7 @@ const tools = [
     type: "function",
     function: {
       name: "search_articles",
-      description: "Search published articles on the site by topic/keyword.",
+      description: "Search ALL published articles on the site by topic/keyword.",
       parameters: {
         type: "object",
         properties: { query: { type: "string" } },
@@ -69,7 +69,62 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "search_current_page",
+      description:
+        "Search ONLY the content the user is currently viewing (current section or article). Returns matching excerpts with the query highlighted. Use this whenever the user asks about 'this page', 'this section', 'here', or to find/summarize something on the page they're on.",
+      parameters: {
+        type: "object",
+        properties: { query: { type: "string", description: "Keyword or phrase to find on the current page." } },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "summarize_current_page",
+      description: "Summarize the content the user is currently viewing (current section or article).",
+      parameters: { type: "object", properties: {} },
+    },
+  },
 ];
+
+// ----- Page-aware helpers -----
+function getPageScope(page?: PageContext) {
+  if (!page) return { label: "site", articles: ARTICLES };
+  const m = page.path.match(/^\/section\/([^/]+)/);
+  if (m) {
+    const s = SECTIONS.find((x) => x.slug === m[1]);
+    return { label: s ? `the ${s.name} section` : "this section", articles: articlesByCategory(m[1]) };
+  }
+  const a = page.path.match(/^\/article\/([^/]+)/);
+  if (a) {
+    const art = findArticle(a[1]);
+    return { label: art ? `the article "${art.title}"` : "this article", articles: art ? [art] : [] };
+  }
+  return { label: "the site", articles: ARTICLES };
+}
+
+function makeExcerpt(text: string, q: string, around = 80) {
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return null;
+  const start = Math.max(0, i - around);
+  const end = Math.min(text.length, i + q.length + around);
+  return (start > 0 ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
+}
+
+function searchScope(articles: typeof ARTICLES, q: string): Excerpt[] {
+  const out: Excerpt[] = [];
+  for (const a of articles) {
+    const haystack = [a.title, a.dek, ...a.body].join("\n");
+    const snip = makeExcerpt(haystack, q);
+    if (snip) out.push({ slug: a.slug, title: a.title, category: a.category, snippet: snip });
+  }
+  return out.slice(0, 6);
+}
 
 function mockSeries(seed: number, len = 30) {
   const out: number[] = [];

@@ -52,7 +52,7 @@ function SectionPage() {
             variants={{ show: { transition: { staggerChildren: 0.08 } } }}
             className="mt-10 grid gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-3"
           >
-            {articles.map((a) => (
+            {articles.map((a: typeof articles[number]) => (
               <motion.article
                 key={a.slug}
                 variants={{

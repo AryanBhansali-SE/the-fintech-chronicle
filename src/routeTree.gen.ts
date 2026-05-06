@@ -18,6 +18,7 @@ import { Route as ArticleSlugRouteImport } from './routes/article.$slug'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as ApiPublicConciergeChartRouteImport } from './routes/api/public/concierge-chart'
 import { Route as ApiPublicConciergeRouteImport } from './routes/api/public/concierge'
+import { Route as AdminPostsNewRouteImport } from './routes/admin.posts.new'
 
 const TerminalRoute = TerminalRouteImport.update({
   id: '/terminal',
@@ -64,15 +65,21 @@ const ApiPublicConciergeRoute = ApiPublicConciergeRouteImport.update({
   path: '/api/public/concierge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPostsNewRoute = AdminPostsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminPostsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/terminal': typeof TerminalRoute
-  '/admin/posts': typeof AdminPostsRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
   '/article/$slug': typeof ArticleSlugRoute
   '/section/$slug': typeof SectionSlugRoute
+  '/admin/posts/new': typeof AdminPostsNewRoute
   '/api/public/concierge': typeof ApiPublicConciergeRoute
   '/api/public/concierge-chart': typeof ApiPublicConciergeChartRoute
 }
@@ -81,9 +88,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/terminal': typeof TerminalRoute
-  '/admin/posts': typeof AdminPostsRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
   '/article/$slug': typeof ArticleSlugRoute
   '/section/$slug': typeof SectionSlugRoute
+  '/admin/posts/new': typeof AdminPostsNewRoute
   '/api/public/concierge': typeof ApiPublicConciergeRoute
   '/api/public/concierge-chart': typeof ApiPublicConciergeChartRoute
 }
@@ -93,9 +101,10 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/terminal': typeof TerminalRoute
-  '/admin/posts': typeof AdminPostsRoute
+  '/admin/posts': typeof AdminPostsRouteWithChildren
   '/article/$slug': typeof ArticleSlugRoute
   '/section/$slug': typeof SectionSlugRoute
+  '/admin/posts/new': typeof AdminPostsNewRoute
   '/api/public/concierge': typeof ApiPublicConciergeRoute
   '/api/public/concierge-chart': typeof ApiPublicConciergeChartRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/article/$slug'
     | '/section/$slug'
+    | '/admin/posts/new'
     | '/api/public/concierge'
     | '/api/public/concierge-chart'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/article/$slug'
     | '/section/$slug'
+    | '/admin/posts/new'
     | '/api/public/concierge'
     | '/api/public/concierge-chart'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/article/$slug'
     | '/section/$slug'
+    | '/admin/posts/new'
     | '/api/public/concierge'
     | '/api/public/concierge-chart'
   fileRoutesById: FileRoutesById
@@ -211,15 +223,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/posts/new': {
+      id: '/admin/posts/new'
+      path: '/new'
+      fullPath: '/admin/posts/new'
+      preLoaderRoute: typeof AdminPostsNewRouteImport
+      parentRoute: typeof AdminPostsRoute
+    }
   }
 }
 
+interface AdminPostsRouteChildren {
+  AdminPostsNewRoute: typeof AdminPostsNewRoute
+}
+
+const AdminPostsRouteChildren: AdminPostsRouteChildren = {
+  AdminPostsNewRoute: AdminPostsNewRoute,
+}
+
+const AdminPostsRouteWithChildren = AdminPostsRoute._addFileChildren(
+  AdminPostsRouteChildren,
+)
+
 interface AdminRouteChildren {
-  AdminPostsRoute: typeof AdminPostsRoute
+  AdminPostsRoute: typeof AdminPostsRouteWithChildren
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminPostsRoute: AdminPostsRoute,
+  AdminPostsRoute: AdminPostsRouteWithChildren,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -237,3 +268,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

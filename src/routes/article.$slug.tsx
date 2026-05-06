@@ -1,5 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Layout } from "@/components/Layout";
 import { fetchPostBySlug, fetchPublishedPosts, formatDate } from "@/lib/posts";
 
@@ -39,7 +41,6 @@ export const Route = createFileRoute("/article/$slug")({
 
 function ArticlePage() {
   const { article, related } = Route.useLoaderData();
-  const paragraphs = article.body_md.split(/\n\n+/);
 
   return (
     <Layout>
@@ -64,20 +65,17 @@ function ArticlePage() {
           </p>
         </motion.header>
 
+        {article.hero_url && (
+          <img src={article.hero_url} alt="" className="mt-8 w-full max-h-[480px] object-cover" />
+        )}
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="mt-10 max-w-[720px] mx-auto md:columns-2 md:gap-8 [column-rule:1px_solid_var(--color-border)]"
+          className="prose prose-neutral dark:prose-invert mt-10 max-w-[720px] mx-auto font-serif text-[17px] leading-8 prose-headings:font-serif prose-headings:font-black prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-blockquote:border-l-2 prose-blockquote:border-alert prose-blockquote:italic prose-a:text-alert prose-a:underline-offset-4"
         >
-          {paragraphs.map((p: string, i: number) => (
-            <p
-              key={i}
-              className={`mb-5 text-[17px] leading-8 break-inside-avoid ${i === 0 ? "dropcap" : ""}`}
-            >
-              {p}
-            </p>
-          ))}
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.body_md}</ReactMarkdown>
         </motion.div>
 
         {article.tags?.length > 0 && (

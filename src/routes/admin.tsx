@@ -52,6 +52,11 @@ ON CONFLICT DO NOTHING;`}
           </p>
         </header>
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Link to="/admin/posts" className="border-t-2 border-alert pt-4 group">
+            <h3 className="font-serif text-2xl font-bold group-hover:underline">Posts</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Write, edit, and publish articles directly from the website.</p>
+            <p className="mt-3 text-xs smallcaps text-alert font-bold">Open editor →</p>
+          </Link>
           {[
             { title: "AI Assistant", body: "Chat with the LLM-as-router. Drafts in your voice." },
             { title: "Research Vault", body: "Private notes, papers, and embeddings." },

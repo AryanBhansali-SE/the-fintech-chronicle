@@ -41,7 +41,6 @@ export const Route = createFileRoute("/article/$slug")({
 
 function ArticlePage() {
   const { article, related } = Route.useLoaderData();
-  const paragraphs = article.body_md.split(/\n\n+/);
 
   return (
     <Layout>
